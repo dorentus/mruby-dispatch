@@ -37,5 +37,5 @@ mrb_mruby_dispatch_gem_init(mrb_state *mrb)
 void
 mrb_mruby_dispatch_gem_final(mrb_state *mrb)
 {
-  predicate = NULL;
+  predicate = 0;
 }

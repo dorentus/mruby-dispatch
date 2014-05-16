@@ -1,7 +1,7 @@
 language: c
 compiler: clang
 install:
-  - sudo apt-get -qq install gperf libdispatch-dev
+  - sudo apt-get -qq install gperf libdispatch-dev libblocksruntime-dev
 before_script:
   - cd ../
   - git clone https://github.com/mruby/mruby.git

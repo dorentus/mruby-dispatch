@@ -1,0 +1,11 @@
+language: c
+compiler: clang
+install:
+  - sudo apt-get -qq install gperf libdispatch-dev
+before_script:
+  - cd ../
+  - git clone https://github.com/mruby/mruby.git
+  - cd mruby
+env: MRUBY_CONFIG=../mruby-dispatch/.travis_build_config.rb
+script:
+  - "./minirake all test"

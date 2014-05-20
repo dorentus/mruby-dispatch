@@ -90,9 +90,11 @@ mrb_queue_concurrent(mrb_state *mrb, mrb_value self)
   else if (priority == mrb_intern_cstr(mrb, "low")) {
     priority_value = DISPATCH_QUEUE_PRIORITY_LOW;
   }
+#ifdef DISPATCH_QUEUE_PRIORITY_BACKGROUND
   else if (priority == mrb_intern_cstr(mrb, "background")) {
     priority_value = DISPATCH_QUEUE_PRIORITY_BACKGROUND;
   }
+#endif
   else {
     priority_value = DISPATCH_QUEUE_PRIORITY_DEFAULT;
   }

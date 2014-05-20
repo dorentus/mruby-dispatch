@@ -1,7 +1,38 @@
-#include "mruby.h"
 #include <dispatch/dispatch.h>
+#include <mruby.h>
+#include <mruby/data.h>
 
-static dispatch_once_t predicate;
+static char const MRB_DISPATCH_ONCE_PRED_KEY[] = "$mrb_dispatch_once_pred";
+static struct mrb_data_type mrb_dispatch_once_type = { MRB_DISPATCH_ONCE_PRED_KEY, mrb_free };
+
+static void
+mrb_dispatch_once_pred_init(mrb_state *mrb)
+{
+  dispatch_once_t *predicate_ptr;
+  mrb_value self;
+
+  self = mrb_obj_value(mrb->top_self);
+  DATA_TYPE(self) = &mrb_dispatch_once_type;
+  DATA_PTR(self) = NULL;
+
+  predicate_ptr = (dispatch_once_t *)mrb_malloc(mrb, sizeof(dispatch_once_t));
+  *predicate_ptr = 0;
+
+  DATA_PTR(self) = predicate_ptr;
+}
+
+static dispatch_once_t *
+mrb_dispatch_once_pred_ptr(mrb_state *mrb)
+{
+  dispatch_once_t *predicate_ptr;
+  mrb_value self;
+
+  self = mrb_obj_value(mrb->top_self);
+
+  predicate_ptr = (dispatch_once_t *)DATA_PTR(self);
+
+  return predicate_ptr;
+}
 
 static mrb_value
 mrb_dispatch_once(mrb_state *mrb, mrb_value self)
@@ -14,7 +45,7 @@ mrb_dispatch_once(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_ARGUMENT_ERROR, "no block given");
   }
 
-  dispatch_once(&predicate, ^{
+  dispatch_once(mrb_dispatch_once_pred_ptr(mrb), ^{
     mrb_yield(mrb, blk, mrb_nil_value());
   });
 
@@ -28,6 +59,8 @@ mrb_mruby_dispatch_gem_init(mrb_state *mrb)
 
   dispatch = mrb_define_module(mrb, "Dispatch");
 
+  mrb_dispatch_once_pred_init(mrb);
+
   mrb_define_const(mrb, dispatch, "TIME_NOW", mrb_fixnum_value(DISPATCH_TIME_NOW));
   mrb_define_const(mrb, dispatch, "TIME_FOREVER", mrb_fixnum_value(DISPATCH_TIME_FOREVER));
 
@@ -37,5 +70,4 @@ mrb_mruby_dispatch_gem_init(mrb_state *mrb)
 void
 mrb_mruby_dispatch_gem_final(mrb_state *mrb)
 {
-  predicate = 0;
 }

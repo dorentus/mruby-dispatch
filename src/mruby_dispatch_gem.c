@@ -1,6 +1,4 @@
-#include <dispatch/dispatch.h>
-#include <mruby.h>
-#include <mruby/data.h>
+#include "mruby_dispatch_gem.h"
 
 static char const MRB_DISPATCH_ONCE_PRED_KEY[] = "$mrb_dispatch_once_pred";
 static struct mrb_data_type mrb_dispatch_once_type = { MRB_DISPATCH_ONCE_PRED_KEY, mrb_free };
@@ -65,9 +63,12 @@ mrb_mruby_dispatch_gem_init(mrb_state *mrb)
   mrb_define_const(mrb, dispatch, "TIME_FOREVER", mrb_fixnum_value(DISPATCH_TIME_FOREVER));
 
   mrb_define_class_method(mrb, dispatch, "once", mrb_dispatch_once, MRB_ARGS_NONE());
+
+  mrb_queue_init(mrb);
 }
 
 void
 mrb_mruby_dispatch_gem_final(mrb_state *mrb)
 {
+  mrb_queue_final(mrb);
 }

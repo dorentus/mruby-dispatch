@@ -39,9 +39,7 @@ mrb_dispatch_once(mrb_state *mrb, mrb_value self)
 
   mrb_get_args(mrb, "&", &blk);
 
-  if (mrb_nil_p(blk)) {
-    mrb_raise(mrb, E_ARGUMENT_ERROR, "no block given");
-  }
+  DISPATCH_ENSURE_BLOCK_GIVEN(blk);
 
   dispatch_once(mrb_dispatch_once_pred_ptr(mrb), ^{
     mrb_yield(mrb, blk, mrb_nil_value());

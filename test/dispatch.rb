@@ -57,3 +57,21 @@ assert('Dispatch::Queue#apply') do
   end
   assert_equal(56, i)
 end
+
+assert('Dispatch::Queue#async') do
+  q = Dispatch::Queue.new "test.dispatch.async"
+  i = 1
+  q.async do
+    i = 2
+  end
+  assert_equal(1, i)
+end
+
+assert('Dispatch::Queue#sync') do
+  q = Dispatch::Queue.new "test.dispatch.sync"
+  i = 1
+  q.sync do
+    i = 2
+  end
+  assert_equal(2, i)
+end

@@ -23,7 +23,7 @@ assert('Dispatch::Queue.current') do
 end
 
 assert('Dispatch::Queue.main') do
-  q = Dispatch::Queue.current
+  q = Dispatch::Queue.main
   assert_equal(Dispatch::Queue, q.class);
 end
 
@@ -38,4 +38,13 @@ assert('Dispatch::Queue.concurrent [2]') do
   q1 = Dispatch::Queue.concurrent :default
   q2 = Dispatch::Queue.concurrent
   assert_equal(q1.to_s, q2.to_s)
+end
+
+assert('Dispatch::Queue#after') do
+  q = Dispatch::Queue.concurrent
+  i = 1
+  q.after 0 do
+    i += 1
+  end
+  assert_equal(1, i);
 end

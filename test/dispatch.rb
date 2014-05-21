@@ -3,7 +3,7 @@ assert('Dispatch.once') do
   10.times do
     Dispatch.once { a += 1 }
   end
-  assert_equal a, 2
+  assert_equal 2, a
 end
 
 assert('Dispatch::Queue#to_s [1]') do

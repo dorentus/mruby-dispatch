@@ -11,6 +11,13 @@ static struct mrb_data_type mrb_dispatch_queue_type = { "$mrb_dispatch_queue", m
 static mrb_value
 mrb_queue_set_queue(mrb_value self, dispatch_queue_t q)
 {
+  dispatch_queue_t old_q;
+
+  old_q = (dispatch_queue_t)DATA_PTR(self);
+  if (old_q) {
+    dispatch_release(old_q);
+  }
+
   DATA_TYPE(self) = &mrb_dispatch_queue_type;
   DATA_PTR(self) = q;
 

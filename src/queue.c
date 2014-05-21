@@ -20,14 +20,6 @@
     return mrb_nil_value(); \
   }
 
-static void
-mrb_dispatch_queue_release(mrb_state *mrb, void *data)
-{
-  dispatch_release((dispatch_queue_t)data);
-}
-
-static struct mrb_data_type mrb_dispatch_queue_type = { "$mrb_dispatch_queue", mrb_dispatch_queue_release };
-
 static mrb_value
 mrb_queue_set_queue(mrb_value self, dispatch_queue_t q)
 {
@@ -38,7 +30,7 @@ mrb_queue_set_queue(mrb_value self, dispatch_queue_t q)
     dispatch_release(old_q);
   }
 
-  DATA_TYPE(self) = &mrb_dispatch_queue_type;
+  DATA_TYPE(self) = &mrb_dispatch_object_type;
   DATA_PTR(self) = q;
 
   return self;
@@ -188,10 +180,11 @@ DISPATCH_QUEUE_DEFUN(mrb_queue_barrier_sync, dispatch_barrier_sync);
 void
 mrb_queue_init(mrb_state *mrb)
 {
-  struct RClass *dispatch, *queue;
+  struct RClass *dispatch, *object, *queue;
 
   dispatch = mrb_module_get(mrb, "Dispatch");
-  queue = mrb_define_class_under(mrb, dispatch, "Queue", mrb->object_class);
+  object = mrb_class_get_under(mrb, dispatch, "Object");
+  queue = mrb_define_class_under(mrb, dispatch, "Queue", object);
 
   mrb_define_class_method(mrb, queue, "current", mrb_queue_current, MRB_ARGS_NONE());
   mrb_define_class_method(mrb, queue, "main", mrb_queue_main, MRB_ARGS_NONE());

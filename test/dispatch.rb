@@ -105,3 +105,8 @@ assert('Dispatch::Queue#barrier_sync') do
   end
   assert_equal(5, i)
 end if Dispatch::Queue.method_defined? :barrier_sync
+
+assert('Dispatch::Object') do
+  assert_true Dispatch::Queue.method_defined? :resume!
+  assert_true Dispatch::Queue.method_defined? :suspend!
+end

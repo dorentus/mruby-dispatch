@@ -179,8 +179,11 @@ mrb_queue_apply(mrb_state *mrb, mrb_value self)
 
 DISPATCH_QUEUE_DEFUN(mrb_queue_async, dispatch_async);
 DISPATCH_QUEUE_DEFUN(mrb_queue_sync, dispatch_sync);
+
+#if defined(__MAC_10_7) || defined(__IPHONE_4_3)
 DISPATCH_QUEUE_DEFUN(mrb_queue_barrier_async, dispatch_barrier_async);
 DISPATCH_QUEUE_DEFUN(mrb_queue_barrier_sync, dispatch_barrier_sync);
+#endif
 
 void
 mrb_queue_init(mrb_state *mrb)
@@ -200,8 +203,11 @@ mrb_queue_init(mrb_state *mrb)
   mrb_define_method(mrb, queue, "apply", mrb_queue_apply, MRB_ARGS_REQ(1));
   mrb_define_method(mrb, queue, "async", mrb_queue_async, MRB_ARGS_NONE());
   mrb_define_method(mrb, queue, "sync", mrb_queue_sync, MRB_ARGS_NONE());
+
+#if defined(__MAC_10_7) || defined(__IPHONE_4_3)
   mrb_define_method(mrb, queue, "barrier_async", mrb_queue_barrier_async, MRB_ARGS_NONE());
   mrb_define_method(mrb, queue, "barrier_sync", mrb_queue_barrier_sync, MRB_ARGS_NONE());
+#endif
 }
 
 void

@@ -89,7 +89,7 @@ assert('Dispatch::Queue#barrier_async') do
     i += 1
   end
   assert_equal(1, i)
-end
+end if Dispatch::Queue.method_defined? :barrier_async
 
 assert('Dispatch::Queue#barrier_sync') do
   q = Dispatch::Queue.new "test.dispatch.barrier_sync"
@@ -104,4 +104,4 @@ assert('Dispatch::Queue#barrier_sync') do
     i += 1
   end
   assert_equal(5, i)
-end
+end if Dispatch::Queue.method_defined? :barrier_sync

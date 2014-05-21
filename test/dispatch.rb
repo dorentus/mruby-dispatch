@@ -75,3 +75,33 @@ assert('Dispatch::Queue#sync') do
   end
   assert_equal(2, i)
 end
+
+assert('Dispatch::Queue#barrier_async') do
+  q = Dispatch::Queue.new "test.dispatch.barrier_async"
+  i = 1
+  q.async do
+    i += 1
+  end
+  q.barrier_async do
+    i += 2
+  end
+  q.async do
+    i += 1
+  end
+  assert_equal(1, i)
+end
+
+assert('Dispatch::Queue#barrier_sync') do
+  q = Dispatch::Queue.new "test.dispatch.barrier_sync"
+  i = 1
+  q.sync do
+    i += 1
+  end
+  q.barrier_sync do
+    i += 2
+  end
+  q.sync do
+    i += 1
+  end
+  assert_equal(5, i)
+end

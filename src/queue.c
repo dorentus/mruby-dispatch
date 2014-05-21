@@ -1,5 +1,25 @@
 #include "mruby_dispatch_gem.h"
 
+#define DISPATCH_QUEUE_DEFUN(FUNNAME1, FUNNAME2) \
+  static mrb_value \
+  FUNNAME1(mrb_state *mrb, mrb_value self) \
+  { \
+    mrb_value blk; \
+    dispatch_queue_t q; \
+   \
+    mrb_get_args(mrb, "&", &blk); \
+   \
+    DISPATCH_ENSURE_BLOCK_GIVEN(blk); \
+   \
+    q = (dispatch_queue_t)DATA_PTR(self); \
+   \
+    FUNNAME2(q, ^{ \
+      mrb_yield(mrb, blk, mrb_nil_value()); \
+    }); \
+   \
+    return mrb_nil_value(); \
+  }
+
 static void
 mrb_dispatch_queue_release(mrb_state *mrb, void *data)
 {
@@ -157,43 +177,10 @@ mrb_queue_apply(mrb_state *mrb, mrb_value self)
   return mrb_nil_value();
 }
 
-static mrb_value
-mrb_queue_async(mrb_state *mrb, mrb_value self)
-{
-  mrb_value blk;
-  dispatch_queue_t q;
-
-  mrb_get_args(mrb, "&", &blk);
-
-  DISPATCH_ENSURE_BLOCK_GIVEN(blk);
-
-  q = (dispatch_queue_t)DATA_PTR(self);
-
-  dispatch_async(q, ^{
-    mrb_yield(mrb, blk, mrb_nil_value());
-  });
-
-  return mrb_nil_value();
-}
-
-static mrb_value
-mrb_queue_sync(mrb_state *mrb, mrb_value self)
-{
-  mrb_value blk;
-  dispatch_queue_t q;
-
-  mrb_get_args(mrb, "&", &blk);
-
-  DISPATCH_ENSURE_BLOCK_GIVEN(blk);
-
-  q = (dispatch_queue_t)DATA_PTR(self);
-
-  dispatch_sync(q, ^{
-    mrb_yield(mrb, blk, mrb_nil_value());
-  });
-
-  return mrb_nil_value();
-}
+DISPATCH_QUEUE_DEFUN(mrb_queue_async, dispatch_async);
+DISPATCH_QUEUE_DEFUN(mrb_queue_sync, dispatch_sync);
+DISPATCH_QUEUE_DEFUN(mrb_queue_barrier_async, dispatch_barrier_async);
+DISPATCH_QUEUE_DEFUN(mrb_queue_barrier_sync, dispatch_barrier_sync);
 
 void
 mrb_queue_init(mrb_state *mrb)
@@ -213,6 +200,8 @@ mrb_queue_init(mrb_state *mrb)
   mrb_define_method(mrb, queue, "apply", mrb_queue_apply, MRB_ARGS_REQ(1));
   mrb_define_method(mrb, queue, "async", mrb_queue_async, MRB_ARGS_NONE());
   mrb_define_method(mrb, queue, "sync", mrb_queue_sync, MRB_ARGS_NONE());
+  mrb_define_method(mrb, queue, "barrier_async", mrb_queue_barrier_async, MRB_ARGS_NONE());
+  mrb_define_method(mrb, queue, "barrier_sync", mrb_queue_barrier_sync, MRB_ARGS_NONE());
 }
 
 void

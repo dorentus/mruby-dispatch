@@ -1,11 +1,14 @@
-language: c
-compiler: clang
-install:
-  - sudo apt-get -qq install gperf libdispatch-dev libblocksruntime-dev
 before_script:
+  - export LANG=en_US.UTF-8
   - cd ../
   - git clone https://github.com/mruby/mruby.git
   - cd mruby
-env: MRUBY_CONFIG=../mruby-dispatch/.travis_build_config.rb
 script:
-  - "./minirake all test"
+  - "MRUBY_CONFIG=../mruby-dispatch/.travis_build_config.rb ./minirake all test"
+matrix:
+  include:
+    - install: sudo apt-get -qq install gperf libdispatch-dev libblocksruntime-dev
+      language: c
+      compiler: clang
+
+    - language: objective-c

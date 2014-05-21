@@ -43,8 +43,17 @@ end
 assert('Dispatch::Queue#after') do
   q = Dispatch::Queue.concurrent
   i = 1
-  q.after 0 do
+  q.after 0.5 do
     i += 1
   end
-  assert_equal(1, i);
+  assert_equal(1, i)
+end
+
+assert('Dispatch::Queue#apply') do
+  q = Dispatch::Queue.new "test.dispatch.apply"
+  i = 1
+  q.apply(11) do |n|
+    i += n
+  end
+  assert_equal(56, i)
 end

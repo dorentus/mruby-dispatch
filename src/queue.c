@@ -131,11 +131,31 @@ mrb_queue_after(mrb_state *mrb, mrb_value self)
 
   q = (dispatch_queue_t)DATA_PTR(self);
 
-  const char *label_str = dispatch_queue_get_label(q);
-
   dispatch_time_t pop_time = dispatch_time(DISPATCH_TIME_NOW, (dispatch_time_t)(delay_f * NSEC_PER_SEC));
   dispatch_after(pop_time, q, ^{
     mrb_yield(mrb, blk, mrb_nil_value());
+  });
+
+  return mrb_nil_value();
+}
+
+static mrb_value
+mrb_queue_apply(mrb_state *mrb, mrb_value self)
+{
+  mrb_int iterations_i;
+  mrb_value blk;
+  dispatch_queue_t q;
+
+  mrb_get_args(mrb, "i&", &iterations_i, &blk);
+
+  if (mrb_nil_p(blk)) {
+    mrb_raise(mrb, E_ARGUMENT_ERROR, "no block given");
+  }
+
+  q = (dispatch_queue_t)DATA_PTR(self);
+
+  dispatch_apply(iterations_i, q, ^(size_t idx){
+    mrb_yield(mrb, blk, mrb_fixnum_value((mrb_int)idx));
   });
 
   return mrb_nil_value();
@@ -156,6 +176,7 @@ mrb_queue_init(mrb_state *mrb)
   mrb_define_method(mrb, queue, "initialize", mrb_queue_initialize, MRB_ARGS_OPT(1));
   mrb_define_method(mrb, queue, "to_s", mrb_queue_to_s, MRB_ARGS_NONE());
   mrb_define_method(mrb, queue, "after", mrb_queue_after, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, queue, "apply", mrb_queue_apply, MRB_ARGS_REQ(1));
 }
 
 void

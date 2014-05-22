@@ -8,12 +8,19 @@
 
 void mrb_object_init(mrb_state *mrb);
 void mrb_object_final(mrb_state *mrb);
+void mrb_group_init(mrb_state *mrb);
+void mrb_group_final(mrb_state *mrb);
 void mrb_queue_init(mrb_state *mrb);
 void mrb_queue_final(mrb_state *mrb);
 
 #define DISPATCH_ENSURE_BLOCK_GIVEN(blk) do { \
         if (mrb_nil_p((blk))) { \
           mrb_raise(mrb, E_ARGUMENT_ERROR, "no block given"); \
+        } } while (0)
+
+#define DISPATCH_ENSURE_PARAM_IS_KIND_OF(param, klass) do { \
+        if (!mrb_obj_is_kind_of(mrb, param, klass)) { \
+          mrb_raisef(mrb, E_TYPE_ERROR, "wrong argument class (expected %S)", klass); \
         } } while (0)
 
 void mrb_dispatch_release(mrb_state *mrb, void *data);

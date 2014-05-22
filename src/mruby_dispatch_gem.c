@@ -63,6 +63,7 @@ mrb_mruby_dispatch_gem_init(mrb_state *mrb)
   mrb_define_class_method(mrb, dispatch, "once", mrb_dispatch_once, MRB_ARGS_NONE());
 
   mrb_object_init(mrb);
+  mrb_group_init(mrb);
   mrb_queue_init(mrb);
 }
 
@@ -70,5 +71,6 @@ void
 mrb_mruby_dispatch_gem_final(mrb_state *mrb)
 {
   mrb_queue_final(mrb);
+  mrb_group_final(mrb);
   mrb_object_final(mrb);
 }

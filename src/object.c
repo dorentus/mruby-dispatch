@@ -25,7 +25,7 @@ mrb_dispatch_suspend(mrb_state *mrb, mrb_value self)
 static mrb_value
 mrb_get_dispatch_object(mrb_state *mrb, mrb_value self)
 {
-  struct Rclass *os_dispatch_object;
+  struct RClass *os_dispatch_object;
 
   os_dispatch_object = mrb_class_get(mrb, "OS_dispatch_object");
 

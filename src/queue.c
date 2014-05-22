@@ -21,6 +21,17 @@
   }
 
 static mrb_value
+mrb_queue_create_instance(mrb_state *mrb)
+{
+  struct RClass *dispatch_class, *queue_class;
+
+  dispatch_class = mrb_module_get(mrb, "Dispatch");
+  queue_class = mrb_class_get_under(mrb, dispatch_class, "Queue");
+
+  return mrb_obj_value(mrb_obj_alloc(mrb, MRB_TT_OBJECT, queue_class));
+}
+
+static mrb_value
 mrb_queue_set_queue(mrb_value self, dispatch_queue_t q)
 {
   dispatch_queue_t old_q;
@@ -66,12 +77,8 @@ mrb_queue_current(mrb_state *mrb, mrb_value self)
 {
   mrb_value instance;
   dispatch_queue_t q;
-  struct RClass *dispatch, *queue;
 
-  dispatch = mrb_module_get(mrb, "Dispatch");
-  queue = mrb_class_get_under(mrb, dispatch, "Queue");
-
-  instance = mrb_obj_new(mrb, queue, 0, NULL);
+  instance = mrb_queue_create_instance(mrb);
   q = dispatch_get_current_queue();
 
   return mrb_queue_set_queue(instance, q);
@@ -82,12 +89,8 @@ mrb_queue_main(mrb_state *mrb, mrb_value self)
 {
   mrb_value instance;
   dispatch_queue_t q;
-  struct RClass *dispatch, *queue;
 
-  dispatch = mrb_module_get(mrb, "Dispatch");
-  queue = mrb_class_get_under(mrb, dispatch, "Queue");
-
-  instance = mrb_obj_new(mrb, queue, 0, NULL);
+  instance = mrb_queue_create_instance(mrb);
   q = dispatch_get_main_queue();
 
   return mrb_queue_set_queue(instance, q);
@@ -100,7 +103,6 @@ mrb_queue_concurrent(mrb_state *mrb, mrb_value self)
   mrb_sym priority;
   long priority_value;
   dispatch_queue_t q;
-  struct RClass *dispatch, *queue;
 
   mrb_get_args(mrb, "|n", &priority);
   if (priority == mrb_intern_cstr(mrb, "high")) {
@@ -118,10 +120,7 @@ mrb_queue_concurrent(mrb_state *mrb, mrb_value self)
     priority_value = DISPATCH_QUEUE_PRIORITY_DEFAULT;
   }
 
-  dispatch = mrb_module_get(mrb, "Dispatch");
-  queue = mrb_class_get_under(mrb, dispatch, "Queue");
-
-  instance = mrb_obj_new(mrb, queue, 0, NULL);
+  instance = mrb_queue_create_instance(mrb);
 
   q = dispatch_get_global_queue(priority_value, 0);
 
@@ -214,26 +213,26 @@ DISPATCH_QUEUE_DEFUN(mrb_queue_barrier_sync, dispatch_barrier_sync);
 void
 mrb_queue_init(mrb_state *mrb)
 {
-  struct RClass *dispatch, *object, *queue;
+  struct RClass *dispatch_class, *object_class, *queue_class;
 
-  dispatch = mrb_module_get(mrb, "Dispatch");
-  object = mrb_class_get_under(mrb, dispatch, "Object");
-  queue = mrb_define_class_under(mrb, dispatch, "Queue", object);
+  dispatch_class = mrb_module_get(mrb, "Dispatch");
+  object_class = mrb_class_get_under(mrb, dispatch_class, "Object");
+  queue_class = mrb_define_class_under(mrb, dispatch_class, "Queue", object_class);
 
-  mrb_define_class_method(mrb, queue, "current", mrb_queue_current, MRB_ARGS_NONE());
-  mrb_define_class_method(mrb, queue, "main", mrb_queue_main, MRB_ARGS_NONE());
-  mrb_define_class_method(mrb, queue, "concurrent", mrb_queue_concurrent, MRB_ARGS_OPT(1));
+  mrb_define_class_method(mrb, queue_class, "current", mrb_queue_current, MRB_ARGS_NONE());
+  mrb_define_class_method(mrb, queue_class, "main", mrb_queue_main, MRB_ARGS_NONE());
+  mrb_define_class_method(mrb, queue_class, "concurrent", mrb_queue_concurrent, MRB_ARGS_OPT(1));
 
-  mrb_define_method(mrb, queue, "initialize", mrb_queue_initialize, MRB_ARGS_OPT(1));
-  mrb_define_method(mrb, queue, "to_s", mrb_queue_to_s, MRB_ARGS_NONE());
-  mrb_define_method(mrb, queue, "after", mrb_queue_after, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, queue, "apply", mrb_queue_apply, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, queue, "async", mrb_queue_async, MRB_ARGS_OPT(1));
-  mrb_define_method(mrb, queue, "sync", mrb_queue_sync, MRB_ARGS_NONE());
+  mrb_define_method(mrb, queue_class, "initialize", mrb_queue_initialize, MRB_ARGS_OPT(1));
+  mrb_define_method(mrb, queue_class, "to_s", mrb_queue_to_s, MRB_ARGS_NONE());
+  mrb_define_method(mrb, queue_class, "after", mrb_queue_after, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, queue_class, "apply", mrb_queue_apply, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, queue_class, "async", mrb_queue_async, MRB_ARGS_OPT(1));
+  mrb_define_method(mrb, queue_class, "sync", mrb_queue_sync, MRB_ARGS_NONE());
 
 #if defined(__MAC_10_7) || defined(__IPHONE_4_3)
-  mrb_define_method(mrb, queue, "barrier_async", mrb_queue_barrier_async, MRB_ARGS_NONE());
-  mrb_define_method(mrb, queue, "barrier_sync", mrb_queue_barrier_sync, MRB_ARGS_NONE());
+  mrb_define_method(mrb, queue_class, "barrier_async", mrb_queue_barrier_async, MRB_ARGS_NONE());
+  mrb_define_method(mrb, queue_class, "barrier_sync", mrb_queue_barrier_sync, MRB_ARGS_NONE());
 #endif
 }
 

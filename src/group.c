@@ -61,15 +61,15 @@ mrb_group_wait(mrb_state *mrb, mrb_value self)
 void
 mrb_group_init(mrb_state *mrb)
 {
-  struct RClass *dispatch, *object, *group;
+  struct RClass *dispatch_class, *object_class, *group_class;
 
-  dispatch = mrb_module_get(mrb, "Dispatch");
-  object = mrb_class_get_under(mrb, dispatch, "Object");
-  group = mrb_define_class_under(mrb, dispatch, "Group", object);
+  dispatch_class = mrb_module_get(mrb, "Dispatch");
+  object_class = mrb_class_get_under(mrb, dispatch_class, "Object");
+  group_class = mrb_define_class_under(mrb, dispatch_class, "Group", object_class);
 
-  mrb_define_method(mrb, group, "initialize", mrb_group_initialize, MRB_ARGS_NONE());
-  mrb_define_method(mrb, group, "notify", mrb_group_notify, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, group, "wait", mrb_group_wait, MRB_ARGS_OPT(1));
+  mrb_define_method(mrb, group_class, "initialize", mrb_group_initialize, MRB_ARGS_NONE());
+  mrb_define_method(mrb, group_class, "notify", mrb_group_notify, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, group_class, "wait", mrb_group_wait, MRB_ARGS_OPT(1));
 }
 
 void

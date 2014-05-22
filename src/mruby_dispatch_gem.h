@@ -12,6 +12,8 @@ void mrb_group_init(mrb_state *mrb);
 void mrb_group_final(mrb_state *mrb);
 void mrb_queue_init(mrb_state *mrb);
 void mrb_queue_final(mrb_state *mrb);
+void mrb_sema_init(mrb_state *mrb);
+void mrb_sema_final(mrb_state *mrb);
 
 #define DISPATCH_ENSURE_BLOCK_GIVEN(mrb, blk) do { \
         if (mrb_nil_p((blk))) { \

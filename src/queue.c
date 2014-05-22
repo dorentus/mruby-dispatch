@@ -9,7 +9,7 @@
    \
     mrb_get_args(mrb, "&", &blk); \
    \
-    DISPATCH_ENSURE_BLOCK_GIVEN(blk); \
+    DISPATCH_ENSURE_BLOCK_GIVEN(mrb, blk); \
    \
     q = (dispatch_queue_t)DATA_PTR(self); \
    \
@@ -137,7 +137,7 @@ mrb_queue_after(mrb_state *mrb, mrb_value self)
 
   mrb_get_args(mrb, "f&", &delay_f, &blk);
 
-  DISPATCH_ENSURE_BLOCK_GIVEN(blk);
+  DISPATCH_ENSURE_BLOCK_GIVEN(mrb, blk);
 
   q = (dispatch_queue_t)DATA_PTR(self);
 
@@ -158,7 +158,7 @@ mrb_queue_apply(mrb_state *mrb, mrb_value self)
 
   mrb_get_args(mrb, "i&", &iterations_i, &blk);
 
-  DISPATCH_ENSURE_BLOCK_GIVEN(blk);
+  DISPATCH_ENSURE_BLOCK_GIVEN(mrb, blk);
 
   q = (dispatch_queue_t)DATA_PTR(self);
 
@@ -169,7 +169,41 @@ mrb_queue_apply(mrb_state *mrb, mrb_value self)
   return mrb_nil_value();
 }
 
-DISPATCH_QUEUE_DEFUN(mrb_queue_async, dispatch_async);
+static mrb_value
+mrb_queue_async(mrb_state *mrb, mrb_value self)
+{
+  mrb_value blk;
+  mrb_value group;
+  mrb_bool group_p;
+  dispatch_queue_t q;
+
+  mrb_get_args(mrb, "&|o?", &blk, &group, &group_p);
+
+  DISPATCH_ENSURE_BLOCK_GIVEN(mrb, blk);
+
+  q = (dispatch_queue_t)DATA_PTR(self);
+
+  dispatch_block_t block = ^{
+    mrb_yield(mrb, blk, mrb_nil_value());
+  };
+
+  if (group_p) {
+    struct RClass *dispatch_class = mrb_module_get(mrb, "Dispatch");
+    struct RClass *group_class = mrb_class_get_under(mrb, dispatch_class, "Group");
+    DISPATCH_ENSURE_PARAM_IS_KIND_OF(mrb, group, group_class);
+
+    dispatch_group_t g = DISPATCH_GET_OBJECT(mrb, group, dispatch_group_t);
+
+    dispatch_group_async(g, q, block);
+  }
+  else {
+    dispatch_async(q, block);
+  }
+
+  return mrb_nil_value();
+}
+
+
 DISPATCH_QUEUE_DEFUN(mrb_queue_sync, dispatch_sync);
 
 #if defined(__MAC_10_7) || defined(__IPHONE_4_3)
@@ -194,7 +228,7 @@ mrb_queue_init(mrb_state *mrb)
   mrb_define_method(mrb, queue, "to_s", mrb_queue_to_s, MRB_ARGS_NONE());
   mrb_define_method(mrb, queue, "after", mrb_queue_after, MRB_ARGS_REQ(1));
   mrb_define_method(mrb, queue, "apply", mrb_queue_apply, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, queue, "async", mrb_queue_async, MRB_ARGS_NONE());
+  mrb_define_method(mrb, queue, "async", mrb_queue_async, MRB_ARGS_OPT(1));
   mrb_define_method(mrb, queue, "sync", mrb_queue_sync, MRB_ARGS_NONE());
 
 #if defined(__MAC_10_7) || defined(__IPHONE_4_3)

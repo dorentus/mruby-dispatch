@@ -26,11 +26,11 @@ mrb_group_notify(mrb_state *mrb, mrb_value self)
 
   mrb_get_args(mrb, "o&", &queue, &blk);
 
-  DISPATCH_ENSURE_BLOCK_GIVEN(blk);
-  DISPATCH_ENSURE_PARAM_IS_KIND_OF(queue, queue_class);
+  DISPATCH_ENSURE_BLOCK_GIVEN(mrb, blk);
+  DISPATCH_ENSURE_PARAM_IS_KIND_OF(mrb, queue, queue_class);
 
   g = (dispatch_group_t)DATA_PTR(self);
-  q = (dispatch_queue_t)DATA_PTR(mrb_funcall(mrb, queue, "dispatch_object", 0));
+  q = DISPATCH_GET_OBJECT(mrb, queue, dispatch_queue_t);
 
   dispatch_group_notify(g, q, ^{
     mrb_yield(mrb, blk, mrb_nil_value());
@@ -48,7 +48,7 @@ mrb_group_wait(mrb_state *mrb, mrb_value self)
 
   mrb_get_args(mrb, "|f&", &delay_f, &blk);
 
-  DISPATCH_ENSURE_BLOCK_GIVEN(blk);
+  DISPATCH_ENSURE_BLOCK_GIVEN(mrb, blk);
 
   g = (dispatch_group_t)DATA_PTR(self);
 

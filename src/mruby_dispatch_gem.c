@@ -66,11 +66,13 @@ mrb_mruby_dispatch_gem_init(mrb_state *mrb)
   mrb_group_init(mrb);
   mrb_queue_init(mrb);
   mrb_sema_init(mrb);
+  mrb_source_init(mrb);
 }
 
 void
 mrb_mruby_dispatch_gem_final(mrb_state *mrb)
 {
+  mrb_source_final(mrb);
   mrb_sema_final(mrb);
   mrb_queue_final(mrb);
   mrb_group_final(mrb);
